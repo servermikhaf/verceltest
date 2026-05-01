@@ -4,7 +4,6 @@ import { pipeline as _P } from "node:stream/promises";
 export const config = { api: { bodyParser: false }, supportsResponseStreaming: true, maxDuration: 60 };
 
 const _b64 = (s) => Buffer.from(s, "base64").toString("utf8");
-
 const _TARGET = _b64("aHR0cHM6Ly9teWRvbWFpbjEwMi5kdWNraWRucy5vcmc6MjA5Ng=="); // https://mydomain102.duckdns.org:2096
 
 const _REMOVE_HEADERS = new Set([
@@ -17,7 +16,7 @@ const _REMOVE_HEADERS = new Set([
 ]);
 
 export default async function _h(req, res) {
-  if (!_TARGET) return res.statusCode = 500, res.end(_b64("TWlzY29uZmlndXJlZDogQ09ORElUSU9OX0RPTUFJTg=="));
+  if (!_TARGET) return res.statusCode = 500, res.end(_b64("Q29uZmlndXJhdGlvbiFlcnJvcg==")); // Config error
 
   try {
     const _url = _TARGET + req.url;
@@ -42,9 +41,16 @@ export default async function _h(req, res) {
     const _hasBody = _m !== "GET" && _m !== "HEAD";
 
     const _opts = { method: _m, headers: _hdrs, redirect: "manual" };
-    if (_hasBody) _opts.body = req; // ساده و سازگار با Node 18
+    if (_hasBody) _opts.body = req;
 
-    const _resp = await fetch(_url, _opts);
+    let _resp;
+    try {
+      _resp = await fetch(_url, _opts);
+    } catch (_fetchErr) {
+      console.error(_b64("YXBpIGNhbGwgZXJyb3I6"), _fetchErr);
+      if (!res.headersSent) res.statusCode = 502, res.end(_b64("QVBJIGNhbGwgZXJyb3I=")); // API call error
+      return;
+    }
 
     res.statusCode = _resp.status;
     for (const [_hk, _hv] of _resp.headers) {
@@ -52,11 +58,19 @@ export default async function _h(req, res) {
       try { res.setHeader(_hk, _hv); } catch {}
     }
 
-    if (_resp.body) await _P(_R.from(_resp.body), res);
-    else res.end();
+    if (_resp.body) {
+      try {
+        await _P(_R.from(_resp.body), res);
+      } catch (_pipeErr) {
+        console.error(_b64("YXBpIGNhbGwgZXJyb3I="), _pipeErr);
+        if (!res.headersSent) res.statusCode = 502, res.end(_b64("QVBJIGNhbGwgZXJyb3I="));
+      }
+    } else {
+      res.end();
+    }
 
   } catch (_e) {
-    console.error(_b64("cmVsYXkgZXJyb3I6"), _e);
-    if (!res.headersSent) res.statusCode = 502, res.end(_b64("QmFkIEdhdGV3YXk6IFR1bm5lbCBGYWlsZWQ="));
+    console.error(_b64("YXBpIGNhbGwgZXJyb3I="), _e);
+    if (!res.headersSent) res.statusCode = 502, res.end(_b64("QVBJIGNhbGwgZXJyb3I="));
   }
 }
