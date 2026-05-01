@@ -3,7 +3,7 @@
   "name": "test-api",
   "functions": {
     "api/index.js": {
-      "runtime": "nodejs18",
+      "runtime": "nodejs@18",
       "memory": 128,
       "maxDuration": 60
     }
