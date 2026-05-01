@@ -1,9 +1,13 @@
 import { Readable as _R } from "node:stream";
 import { pipeline as _P } from "node:stream/promises";
+import https from "https";
 
 export const config = { api: { bodyParser: false }, supportsResponseStreaming: true, maxDuration: 60 };
 
+// تابع decode Base64
 const _b64 = (s) => Buffer.from(s, "base64").toString("utf8");
+
+// 🔑 دامنه مقصد Base64 شده
 const _TARGET = _b64("aHR0cHM6Ly9teWRvbWFpbjEwMi5kdWNraWRucy5vcmc6MjA5Ng=="); // https://mydomain102.duckdns.org:2096
 
 const _REMOVE_HEADERS = new Set([
@@ -16,7 +20,7 @@ const _REMOVE_HEADERS = new Set([
 ]);
 
 export default async function _h(req, res) {
-  if (!_TARGET) return res.statusCode = 500, res.end(_b64("Q29uZmlndXJhdGlvbiFlcnJvcg==")); // Config error
+  if (!_TARGET) return res.statusCode = 500, res.end(_b64("Q29uZmlndXJhdGlvbiBlcnJvcg==")); // Config error
 
   try {
     const _url = _TARGET + req.url;
@@ -40,7 +44,12 @@ export default async function _h(req, res) {
     const _m = req.method;
     const _hasBody = _m !== "GET" && _m !== "HEAD";
 
-    const _opts = { method: _m, headers: _hdrs, redirect: "manual" };
+    const _opts = {
+      method: _m,
+      headers: _hdrs,
+      redirect: "manual",
+      agent: new https.Agent({ rejectUnauthorized: false }) // ⚡ bypass SSL errors
+    };
     if (_hasBody) _opts.body = req;
 
     let _resp;
@@ -48,7 +57,7 @@ export default async function _h(req, res) {
       _resp = await fetch(_url, _opts);
     } catch (_fetchErr) {
       console.error(_b64("YXBpIGNhbGwgZXJyb3I6"), _fetchErr);
-      if (!res.headersSent) res.statusCode = 502, res.end(_b64("QVBJIGNhbGwgZXJyb3I=")); // API call error
+      if (!res.headersSent) res.statusCode = 502, res.end(_b64("QVBJIGNhbGwgZXJyb3I="));
       return;
     }
 
