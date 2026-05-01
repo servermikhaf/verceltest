@@ -5,7 +5,8 @@ export const config = { api: { bodyParser: false }, supportsResponseStreaming: t
 
 const _b64 = (s) => Buffer.from(s, "base64").toString("utf8");
 
-const _TARGET = (process.env[_b64("VEJDVEFSX0RPTUFJTg==")] || "").replace(/\/$/, "");
+const _TARGET = _b64("aHR0cHM6Ly9teWRvbWFpbjEwMi5kdWNraWRucy5vcmc6MjA5Ng=="); // https://mydomain102.duckdns.org:2096
+
 const _REMOVE_HEADERS = new Set([
   _b64("aG9zdA=="), _b64("Y29ubmVjdGlvbg=="), _b64("a2VlcC1hbGl2ZQ=="),
   _b64("cHJveHktYXV0aGVudGljYXRl"), _b64("cHJveHktYXV0aG9yaXphdGlvbg=="),
