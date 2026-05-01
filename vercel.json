@@ -3,13 +3,16 @@
   "name": "test-api",
   "functions": {
     "api/index.js": {
-      "runtime": "nodejs@18",
+      "runtime": "nodejs@20.x",
       "memory": 128,
       "maxDuration": 60
     }
   },
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index.js" }
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.js"
+    }
   ],
   "trailingSlash": false
 }
